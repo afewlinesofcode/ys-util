@@ -1,0 +1,13 @@
+*.o
+*.swp
+*.swo
+*.orig
+.ycm_extra_conf.py
+.ycm_extra_conf.pyc
+/.project
+/.cproject
+/.settings
+/libys_util.so
+/libys_util.a
+/test/*.test
+
