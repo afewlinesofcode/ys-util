@@ -47,13 +47,12 @@ rsrc_set_mt<T>::take()
 
     if (resources_.empty())
     {
-        return this->create();
+        return this->initializer_();
     }
     else
     {
-        resource_ptr res;
+        resource_ptr res { resources_.back() };
 
-        res = resources_.back();
         resources_.pop_back();
 
         return res;
@@ -71,17 +70,6 @@ rsrc_set_mt<T>::put(resource_ptr r)
     std::lock_guard<std::mutex> lock { m_ };
 
     resources_.push_back(r);
-}
-
-/*!
- * Create a new resource.
- *\return Pointer to the created resource.
- */
-template<class T>
-typename rsrc_set_mt<T>::resource_ptr
-rsrc_set_mt<T>::create()
-{
-    return initializer_();
 }
 
 } // namespace ys

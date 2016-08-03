@@ -75,13 +75,6 @@ private:
      * New resource initializer.
      */
     initializer_type initializer_;
-
-    /*!
-     * Create a new resource.
-     *\return Pointer to the created resource.
-     */
-    resource_ptr
-    create();
 };
 
 } // namespace ys
