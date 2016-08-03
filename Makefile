@@ -12,7 +12,7 @@ LIBS =
 
 LDFLAGS =
 
-LDLIBS = -lboost_system -lboost_log
+LDLIBS = -lboost_system -lboost_log -lboost_program_options
 
 TARGET = libys_util
 
@@ -28,11 +28,23 @@ TEST_LIBS =
 
 TEST_LDFLAGS =
 
-TEST_LDLIBS = -lboost_system -lboost_log
+TEST_LDLIBS = $(LDLIBS)
 
 TESTS = $(TEST_SRCS:.cc=.test)
 
 CHECKS = $(TESTS:.test=.check)
+
+EXAMPLE_FLAGS = -O2 -g -Wall -fmessage-length=0 -Iinclude -std=c++14
+
+EXAMPLE_SRCS = $(shell find examples/ -type f -name *.cc)
+
+EXAMPLE_LIBS =
+
+EXAMPLE_LDFLAGS =
+
+EXAMPLE_LDLIBS = $(LDLIBS)
+
+EXAMPLES = $(EXAMPLE_SRCS:.cc=.example)
 
 all: $(TARGET_SO) $(TARGET_A)
 
@@ -70,6 +82,14 @@ check: $(CHECKS)
 
 cleantest:
 	rm -f $(TESTS)
+
+examples: $(EXAMPLES)
+
+%.example: %.cc
+	    $(CXX) $< -o $@ $(EXAMPLE_FLAGS) $(EXAMPLE_LDFLAGS) $(EXAMPLE_LDLIBS) $(EXAMPLE_LIBS) $(TARGET_A)
+
+cleanexamples:
+	rm -f $(EXAMPLES)
 
 .PHONY: clean all test check
 

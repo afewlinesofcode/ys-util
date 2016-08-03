@@ -10,4 +10,5 @@
 /libys_util.so
 /libys_util.a
 /test/*.test
+/examples/*.example
 
