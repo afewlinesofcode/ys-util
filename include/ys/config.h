@@ -84,6 +84,19 @@ protected:
     read_cmd_options();
 
     /*!
+     * Get command-line option value.
+     */
+    template<typename T>
+    T
+    cmd_option(std::string const& name)
+    {
+        if (cmd_options_.count(name))
+            return cmd_options_[name].as<T>();
+
+        return T { };
+    }
+
+    /*!
      * Read a value of a command-line option into a variable.
      * \param name Option name.
      * \param v Target variable.

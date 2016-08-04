@@ -43,16 +43,28 @@ public:
         ys::config(argc, argv)
     {
         /*
-         * First read from config-file.
-         */
-        read_cfg_options();
-
-        /*
-         * Then read from command-line options as we're able to
-         * override some options.
+         * Initialize and read command-line options.
          */
         init_cmd_options();
         read_cmd_options();
+
+        /*
+         * Read config-file options.
+         */
+        read_cfg_options();
+
+        std::cout << "val:" << cmd_option<int>("opt1") << std::endl;
+
+        /*
+         * First load options from config-file.
+         */
+        load_cfg_options();
+
+        /*
+         * Then load options came from command-line as we're able to
+         * override some.
+         */
+        load_cmd_options();
 
         /*
          * If help requested then the application should not proceed.
@@ -75,24 +87,29 @@ public:
     }
 
     /*!
-     * Read command-line options into variables.
+     * Load command-line options into variables.
      */
     void
-    read_cmd_options()
+    load_cmd_options()
     {
-        ys::config::read_cmd_options();
-
         read_cmd_option("opt1", &data.opt1);
     }
 
     /*!
-     * Read config-file options into variables.
+     * Read config-file options.
      */
     void
     read_cfg_options()
     {
         ys::config::read_cfg_options<json>(CONFIG_PATH);
+    }
 
+    /*!
+     * Load config-file options into variables.
+     */
+    void
+    load_cfg_options()
+    {
         read_cfg_option("opt1", &data.opt1);
         read_cfg_option("nested.opt1_1", &data.nested.opt1_1);
         read_cfg_option("nested.opt1_2", &data.nested.opt1_2);
