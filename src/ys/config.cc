@@ -65,6 +65,17 @@ config::read_cmd_options()
 }
 
 /*!
+ * Test if command-line option exists.
+ * \param name Option name.
+ * \return
+ */
+bool
+config::has_cmd_option(std::string const& name) const
+{
+    return cmd_options_.count(name) > 0;
+}
+
+/*!
  * Get a map of command-line options values.
  * \return
  */
@@ -72,6 +83,27 @@ const config::cmd_options_type&
 config::cmd_options() const
 {
     return cmd_options_;
+}
+
+/*!
+ * Get a map of config-file options values.
+ * \return
+ */
+const config::cfg_options_type&
+config::cfg_options() const
+{
+    return cfg_options_;
+}
+
+/*!
+ * Read a vector of string options from a config into a container.
+ */
+void
+config::load_cfg_string_list(std::string path, std::vector<std::string>* v) const
+{
+    for (auto& node : cfg_options().get_child(path)) {
+        v->push_back(node.second.data());
+    }
 }
 
 } // namespace ys

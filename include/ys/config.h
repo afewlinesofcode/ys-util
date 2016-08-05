@@ -9,7 +9,6 @@
 #define YS_CONFIG_H
 
 #include <string>
-#include <type_traits>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -67,56 +66,18 @@ protected:
     init_cmd_options();
 
     /*!
-     * Create a command-line option.
+     * Create a command-line option for initialization.
      * \return
      */
     template<typename T>
     boost::program_options::typed_value<T>*
-    option()
-    {
-        return boost::program_options::value<T>();
-    }
+    option();
 
     /*!
-     * Read command-line options configured before.
+     * Read command-line options configured before into internal structures.
      */
     void
     read_cmd_options();
-
-    /*!
-     * Get command-line option value.
-     */
-    template<typename T>
-    T
-    cmd_option(std::string const& name)
-    {
-        if (cmd_options_.count(name))
-            return cmd_options_[name].as<T>();
-
-        return T { };
-    }
-
-    /*!
-     * Read a value of a command-line option into a variable.
-     * \param name Option name.
-     * \param v Target variable.
-     * \return Value.
-     */
-    template<typename T>
-    const T&
-    read_cmd_option(const std::string& name, T* v)
-    {
-        if (cmd_options_.count(name))
-            *v = cmd_options_[name].as<T>();
-        return *v;
-    }
-
-    /*!
-     * Get a map of command-line options values.
-     * \return
-     */
-    const cmd_options_type&
-    cmd_options() const;
 
     /*!
      * Test if command-line option exists.
@@ -124,10 +85,31 @@ protected:
      * \return
      */
     bool
-    has_cmd_option(const std::string& name) const
-    {
-        return cmd_options_.count(name) > 0;
-    }
+    has_cmd_option(std::string const& name) const;
+
+    /*!
+     * Get command-line option value.
+     */
+    template<typename T>
+    T
+    cmd_option(std::string const& name, bool* error = nullptr) const;
+
+    /*!
+     * Load value from command-line option into variable.
+     * \param name Option name.
+     * \param v Target variable.
+     * \return Value.
+     */
+    template<typename T>
+    const T&
+    load_cmd_option(std::string const& name, T* v) const;
+
+    /*!
+     * Get a map of command-line options.
+     * \return
+     */
+    const cmd_options_type&
+    cmd_options() const;
 
     /*!
      * Read options from a config-file.
@@ -135,11 +117,7 @@ protected:
      */
     template<format F>
     void
-    read_cfg_options(const std::string& path)
-    {
-        cfg_options_reader reader;
-        reader.read<F>(path, cfg_options_);
-    }
+    read_cfg_options(std::string const& path);
 
     /*!
      * Read a value of a config parameter into a variable.
@@ -148,20 +126,20 @@ protected:
      */
     template<typename T>
     void
-    read_cfg_option(const std::string& path, T* v)
-    {
-        *v = cfg_options().get<T>(path);
-    }
+    load_cfg_option(std::string const& path, T* v) const;
+
+    /*!
+     * Read a vector of string options from a config into a container.
+     */
+    void
+    load_cfg_string_list(std::string path, std::vector<std::string>* v) const;
 
     /*!
      * Get a map of config-file options values.
      * \return
      */
     const cfg_options_type&
-    cfg_options() const
-    {
-        return cfg_options_;
-    }
+    cfg_options() const;
 
 private:
     /*!
@@ -191,54 +169,31 @@ private:
     cfg_options_type cfg_options_;
 
     /*!
-     * Config-file options reader class.
+     * Read options from a JSON config file.
+     * \param path File path.
+     * \param tree Target options container.
+     * \return
      */
-    class cfg_options_reader
-    {
-    public:
-        /*!
-         * Read options from a JSON config file.
-         * \param path File path.
-         * \param tree Target options container.
-         * \return
-         */
-        template<format F>
-        typename std::enable_if<F == format::json>::type
-        read(const std::string& path, boost::property_tree::ptree& tree)
-        {
-            try
-            {
-                boost::property_tree::read_json(path, tree);
-            }
-            catch (boost::property_tree::json_parser_error& e)
-            {
-                throw error(e.what());
-            }
-        }
+    template<format F>
+    typename std::enable_if<F == format::json>::type
+    read_config_file(std::string const& path,
+            boost::property_tree::ptree& tree);
 
-        /*!
-         * Read options from an XML config file.
-         * \param path File path.
-         * \param tree Target options container.
-         * \return
-         */
-        template<format F>
-        typename std::enable_if<F == format::xml>::type
-        read(const std::string& path, boost::property_tree::ptree& tree)
-        {
-            try
-            {
-                boost::property_tree::read_xml(path, tree);
-            }
-            catch (boost::property_tree::xml_parser_error& e)
-            {
-                throw error(e.what());
-            }
-        }
-    };
+    /*!
+     * Read options from an XML config file.
+     * \param path File path.
+     * \param tree Target options container.
+     * \return
+     */
+    template<format F>
+    typename std::enable_if<F == format::xml>::type
+    read_config_file(std::string const& path,
+            boost::property_tree::ptree& tree);
 };
 
 } // namespace ys
+
+#include "config.tcc"
 
 #endif // YS_CONFIG_H
 

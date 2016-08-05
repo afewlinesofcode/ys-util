@@ -3,6 +3,10 @@
 	"nested": {
 		"opt1_1": "Hello",
 		"opt1_2": "World"
-	}
+	},
+	"strings": [
+		"str1",
+		"str2"
+	]
 }
 

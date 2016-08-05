@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #define CONFIG_PATH "config.json"
 
@@ -27,6 +28,8 @@ public:
             std::string opt1_1;
             std::string opt1_2;
         } nested;
+
+        std::vector<std::string> strings;
     } data;
 
     /*!
@@ -92,7 +95,7 @@ public:
     void
     load_cmd_options()
     {
-        read_cmd_option("opt1", &data.opt1);
+        load_cmd_option("opt1", &data.opt1);
     }
 
     /*!
@@ -110,9 +113,10 @@ public:
     void
     load_cfg_options()
     {
-        read_cfg_option("opt1", &data.opt1);
-        read_cfg_option("nested.opt1_1", &data.nested.opt1_1);
-        read_cfg_option("nested.opt1_2", &data.nested.opt1_2);
+        load_cfg_option("opt1", &data.opt1);
+        load_cfg_option("nested.opt1_1", &data.nested.opt1_1);
+        load_cfg_option("nested.opt1_2", &data.nested.opt1_2);
+        load_cfg_string_list("strings", &data.strings);
     }
 
     /*!
@@ -127,6 +131,11 @@ public:
            "nested.opt1_1 = " << c.data.nested.opt1_1 << std::endl <<
            "nested.opt1_2 = " << c.data.nested.opt1_2 <<
            std::endl;
+
+        for (std::string const& s: c.data.strings)
+        {
+            os << "strings[] = " << s << std::endl;
+        }
 
         return os;
     }
