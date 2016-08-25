@@ -1,5 +1,5 @@
 /*!
- * \file   
+ * \file
  * \author Stanislav Yaranov <stanislav.yaranov@gmail.com>
  * \date   2016-08-02
  * \brief  Resources set header file.
@@ -15,6 +15,12 @@
 namespace ys
 {
 
+/*!
+ * Class for having a set of resources which need to be used sometimes
+ * by different threads.
+ * For example, a set of socket resources temporary required
+ * when accepting from multiple boost::asio acceptors.
+ */
 template<class T>
 class rsrc_set_mt
 {
@@ -60,6 +66,13 @@ public:
     void
     put(resource_ptr r);
 
+    /*!
+     * Get a number of resources in the set.
+     * \return
+     */
+    size_t
+    size() const;
+
 private:
     /*!
      * Container for resources.
@@ -82,3 +95,4 @@ private:
 #include "rsrc_set_mt.tcc"
 
 #endif // YS_RSRC_SET_MT_H
+

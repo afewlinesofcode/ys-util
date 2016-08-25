@@ -17,17 +17,20 @@ namespace ys
  * Constructor.
  */
 template<class T>
-rsrc_set_mt<T>::rsrc_set_mt()
+rsrc_set_mt<T>::rsrc_set_mt() :
+    initializer_
 {
-    initializer_ = []()
+    []()
     {
         return std::make_shared<T>();
-    };
+    }
+}
+{
 }
 
 /*!
  * Constructor.
- * \param init Initializer for new resources.
+ * \param init Initializer for generating new resource.
  */
 template<class t>
 rsrc_set_mt<t>::rsrc_set_mt(initializer_type const& init) :
@@ -37,7 +40,7 @@ rsrc_set_mt<t>::rsrc_set_mt(initializer_type const& init) :
 
 /*!
  * Take a resource pointer from the set or
- * generate a resource if the set is empty.
+ * generate a new one if the set is empty.
  */
 template<class T>
 typename rsrc_set_mt<T>::resource_ptr
@@ -70,6 +73,17 @@ rsrc_set_mt<T>::put(resource_ptr r)
     std::lock_guard<std::mutex> lock { m_ };
 
     resources_.push_back(r);
+}
+
+/*!
+ * Get a number of resources in the set.
+ * \return
+ */
+template<class T>
+size_t
+rsrc_set_mt<T>::size() const
+{
+    return resources_.size();
 }
 
 } // namespace ys
