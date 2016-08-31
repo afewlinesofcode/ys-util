@@ -54,9 +54,6 @@ $(TARGET_SO): $(OBJS)
 $(TARGET_A): $(OBJS)
 	$(AR) rvs $(TARGET_A) $(OBJS)
 
-clean:
-	rm -f $(OBJS) $(TARGET_SO) $(TARGET_A)
-
 install: all
 	cd include && \
 		find . -type f \( -name *.h -o -name *.tcc \) \
@@ -72,7 +69,7 @@ uninstall:
 
 test: $(TESTS)
 
-%.test: %.cc
+%.test: %.cc $(TARGET_A)
 	    $(CXX) $< -o $@ $(TEST_FLAGS) $(TEST_LDFLAGS) $(TEST_LDLIBS) $(TEST_LIBS) $(TARGET_A)
 
 %.check: %.test
@@ -80,15 +77,14 @@ test: $(TESTS)
 
 check: $(CHECKS)
 
-cleantest:
-	rm -f $(TESTS)
-
 examples: $(EXAMPLES)
 
-%.example: %.cc
+%.example: %.cc $(TARGET_A)
 	    $(CXX) $< -o $@ $(EXAMPLE_FLAGS) $(EXAMPLE_LDFLAGS) $(EXAMPLE_LDLIBS) $(EXAMPLE_LIBS) $(TARGET_A)
 
-cleanexamples:
+clean:
+	rm -f $(OBJS) $(TARGET_SO) $(TARGET_A)
+	rm -f $(TESTS)
 	rm -f $(EXAMPLES)
 
 .PHONY: clean all test check

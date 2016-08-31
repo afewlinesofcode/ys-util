@@ -7,15 +7,18 @@
 
 #include "blocking_queue.h"
 
+#include <utility>
+
 namespace ys
 {
+
 
 /*!
  * Constructor.
  */
 template<class T>
 blocking_queue<T>::blocking_queue() :
-    interrupted_ { false }
+    queue_type {}, interrupted_ { false }
 {
 }
 
@@ -30,42 +33,111 @@ blocking_queue<T>::~blocking_queue()
 }
 
 /*!
- * Add element to the end of the queue.
- * \param item Element to add.
+ * Check whether the queue is empty.
+ * \return
+ */
+template<class T>
+bool
+blocking_queue<T>::empty() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    return queue_type::empty();
+}
+
+/*!
+ * Return the number of elements.
+ * \return
+ */
+template<class T>
+size_t
+blocking_queue<T>::size() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    return queue_type::size();
+}
+
+/*!
+ * Insert element at the end.
+ * \param item Element to insert.
  */
 template<class T>
 void
-blocking_queue<T>::push(T const &item)
+blocking_queue<T>::push(T const& item)
 {
     interrupted_ = false;
 
     {
-        std::lock_guard<std::mutex> lock { mutex_ };
+        lock_type lock { mutex_ };
 
-        queue_.push(item);
+        queue_type::push(item);
     }
 
     cv_.notify_one();
 }
 
 /*!
- * Pop (in the case the queue is empty then wait and then pop) front
- * element from the queue.
- * \param item The result item.
- * \return true if item was fetched, false if fetch failed (interrupted, ...)
+ * Insert element at the end.
+ * \param item Element to insert.
+ */
+template<class T>
+void
+blocking_queue<T>::push(T&& item)
+{
+    interrupted_ = false;
+
+    {
+        lock_type lock { mutex_ };
+
+        queue_type::push(item);
+    }
+
+    cv_.notify_one();
+}
+
+/*!
+ * Construct element in-place at the end.
+ */
+template<class T>
+template<class ...Args>
+void
+blocking_queue<T>::emplace(Args&&... args)
+{
+    queue_type::emplace(std::forward<Args>(args)...);
+}
+
+/*!
+ * Remove the first element.
+ */
+template<class T>
+void
+blocking_queue<T>::pop()
+{
+    lock_type lock { mutex_ };
+
+    queue_type::pop();
+}
+
+/*!
+ * Pop an element.
+ * Remove an element from the front of the queue into the passed parameter.
+ * If the queue is empty then first wait for an element.
+ * \param item The removed element.
+ * \return Returns false if the operation was interrupted.
  */
 template<class T>
 bool
-blocking_queue<T>::pop(T *item)
+blocking_queue<T>::pop(T* item)
 {
     do
     {
         std::unique_lock<std::mutex> lock { mutex_ };
 
-        if (!queue_.empty())
+        if (!queue_type::empty())
         {
-            *item = std::move(queue_.front());
-            queue_.pop();
+            *item = std::move(queue_type::front());
+            queue_type::pop();
 
             return true;
         }
@@ -79,33 +151,21 @@ blocking_queue<T>::pop(T *item)
 }
 
 /*!
- * Check whether the queue is empty.
- * \return
+ * Swap the contents.
  */
 template<class T>
-bool
-blocking_queue<T>::empty() const
+void
+blocking_queue<T>::swap(blocking_queue& q)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    lock_type l1 { mutex_ };
+    lock_type l2 { q.mutex_ };
 
-    return queue_.empty();
+    queue_type::swap(q);
+    swap(interrupted_, q.interrupted_);
 }
 
 /*!
- * Get the size of the queue.
- * \return
- */
-template<class T>
-size_t
-blocking_queue<T>::size() const
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    return queue_.size();
-}
-
-/*!
- * Interrupt waiting and set interrupted flag.
+ * Interrupt waiting and set interrupted flag on.
  */
 template<class T>
 void
