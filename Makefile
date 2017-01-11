@@ -20,6 +20,10 @@ TARGET_SO = $(TARGET).so
 
 TARGET_A = $(TARGET).a
 
+INCLUDE_DIR = "/usr/include/"
+
+LIB_DIR = "/usr/lib/"
+
 TEST_FLAGS = -O2 -g -Wall -fmessage-length=0 -Iinclude -std=c++14
 
 TEST_SRCS = $(shell find test/ -type f -name *.cc)
@@ -57,14 +61,14 @@ $(TARGET_A): $(OBJS)
 install: all
 	cd include && \
 		find . -type f \( -name *.h -o -name *.tcc \) \
-			-exec install -v -DT -m 0644 {} /usr/local/include/{} \;
-	install -v -t /usr/local/lib/ $(TARGET_A) $(TARGET_SO)
+			-exec install -v -DT -m 0644 {} $(INCLUDE_DIR){} \;
+	install -v -t $(LIB_DIR) $(TARGET_A) $(TARGET_SO)
 
 uninstall:
 	cd include && \
 		find . -type f \( -name *.h -o -name *.tcc \) \
-			-exec rm -fv /usr/local/include/{} \;
-	cd /usr/local/lib && \
+			-exec rm -fv $(INCLUDE_DIR){} \;
+	cd $(LIB_DIR) && \
 		rm -fv $(TARGET_A) $(TARGET_SO)
 
 test: $(TESTS)
